@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "norifications"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.110.0"
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+pydantic-settings = "^2.2.1"
+gunicorn = "^21.2.0"
+backoff = "^2.2.1"
+python-dotenv = "^1.0.1"
+orjson = "^3.9.15"
+aiohttp = "^3.9.3"
+async-fastapi-jwt-auth = "^0.6.4"
+asyncio="^3.4.3"
+pytest = "^7.4.4"
+pytest-asyncio = "^0.12.0"
+pydantic = "^2.1.1"
+motor = "^3.4.0"
+schedule = "^0.4.3"
+sentry-sdk = {extras = ["fastapi"], version = "^1.45.0"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
