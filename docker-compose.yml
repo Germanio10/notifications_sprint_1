@@ -1,0 +1,26 @@
+version: '3.4'
+
+services:
+  notification_service:
+    build: ./event_api
+    container_name: notification_service
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - mongo_db
+    networks:
+      - my_network
+
+  mongo_db:
+    image: mongo
+    ports:
+      - "27018:27017"
+    restart: unless-stopped
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    external: True
