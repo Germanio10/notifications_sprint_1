@@ -21,6 +21,10 @@ async def create_database() -> None:
             collection = db['notifications']
             await collection.create_index([('notification_id', 1), ('content_id', 1)], unique=True)
 
+        if 'notification_user_settings' not in await db.list_collection_names():
+            collection = db['notification_user_settings']
+            await collection.create_index([('user_id', 1)], unique=True)
+
         if 'templates' not in await db.list_collection_names():
             collection = db['templates']
             await collection.create_index([('template_id', 1)], unique=True)

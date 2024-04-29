@@ -21,19 +21,20 @@ class Notifications:
             if existing_doc := await self.find_and_update_content(event.content_id, event.content_data):
                 return existing_doc
         notification = Notification(**event.model_dump())
+
         await self.save_user_settings(notification)
         await self.db.save('notifications', notification.model_dump())
         if notification.scheduled:
             await self.broker.send_to_broker(
                 body=QueueMessage(**notification.model_dump()).model_dump_json().encode(),
-                routing_key=settings.queue_scheduled,
+                routing_key='scheduled.notification'
             )
-            return notification.model_dump()
+            return notification
         await self.broker.send_to_broker(
             body=QueueMessage(**notification.model_dump()).model_dump_json().encode(),
             routing_key=settings.queue_instant,
         )
-        return notification.model_dump()
+        return notification
 
     async def save_user_settings(self, notification: Notification) -> None:
         for user_id in notification.users_ids:
@@ -61,7 +62,7 @@ class Notifications:
     async def create_template(self, template: Template) -> Template:
         template = Template(**template.model_dump())
         if await self.db.save('templates', template.model_dump()):
-            return template.model_dump()
+            return template
 
 
 @lru_cache
