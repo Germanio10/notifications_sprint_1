@@ -4,6 +4,8 @@ import uvicorn
 from core.logger import LOGGING
 from core.config import settings
 from db import mongo_storage
+from api.v1 import events
+from broker import rabbit_storage
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
@@ -11,8 +13,12 @@ from fastapi.responses import ORJSONResponse
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await mongo_storage.create_database()
+    await rabbit_storage.init_broker()
+
     yield
+
     await mongo_storage.close_connection()
+    await rabbit_storage.close_connection()
 
 
 app = FastAPI(
@@ -24,6 +30,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.include_router(events.events_router, prefix='/api/v1/notifications', tags=['notifications'])
 
 
 if __name__ == '__main__':

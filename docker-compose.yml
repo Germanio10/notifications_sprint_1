@@ -10,16 +10,27 @@ services:
       - .env
     depends_on:
       - mongo_db
+      - notifications_rabbitmq
     networks:
       - my_network
 
   mongo_db:
     image: mongo
     ports:
-      - "27018:27017"
+      - "27017:27017"
     restart: unless-stopped
     networks:
       - my_network
+
+  notifications_rabbitmq:
+    image: rabbitmq:${RABBIT_VERSION}
+    env_file:
+      - .env
+    networks:
+      - my_network
+    ports:
+      - ${RABBIT_PORT}:${RABBIT_PORT}
+      - ${RABBIT_MANAGEMENT_PORT}:${RABBIT_MANAGEMENT_PORT}
 
 networks:
   my_network:
