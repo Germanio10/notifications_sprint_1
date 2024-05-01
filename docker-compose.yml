@@ -1,25 +1,51 @@
-version: '3.4'
+version: '3.8'
 
 services:
-  notification_service:
-    build: ./event_api
-    container_name: notification_service
-    ports:
-      - "8000:8000"
+  mongo_db:
+    image: mongo
     env_file:
       - .env
+    networks:
+      - my_network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok'
+      interval: 2s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    ports:
+      - "27017:27017"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    env_file:
+      - .env
+    networks:
+      - my_network
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  worker:
+    build:
+      context: ./worker
+    image: worker-image
+    env_file:
+      - .env
+    container_name: worker
     depends_on:
-      - mongo_db
+      mongo_db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - my_network
 
-  mongo_db:
-    image: mongo
-    ports:
-      - "27018:27017"
-    restart: unless-stopped
-    networks:
-      - my_network
 
 networks:
   my_network:
