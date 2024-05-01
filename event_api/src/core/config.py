@@ -1,18 +1,21 @@
-import logging
-
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
-class MongoSettings(BaseSettings):
-    host: str = Field(validation_alias='MONGO_HOST', default='localhost')
-    port: int = Field(validation_alias='MONGO_PORT', default=27017)
-
-
 class Settings(BaseSettings):
-    mongo: MongoSettings = MongoSettings()
-    log_level: int | str = Field(validation_alias='LOG_LEVEL', default=logging.DEBUG)
-    sentry_dsn: str = Field(validation_alias='SENTRY_DSN', default='')
+    project_name: str = Field(validation_alias='PROJECT_NAME', default='notifications')
+    debug: bool = Field(validation_alias='DEBUG', default=True)
+
+    mongo_uri: str = Field(validation_alias='MONGO_URI', default='mongodb://127.0.0.1:27017/')
+    mongo_db: str = Field(validation_alias='MONGO_DB', default='notifications')
+
+    rabbit_uri: str = Field(
+        validation_alias='RABBIT_URI', default='amqp://admin:P@ssw0rd@127.0.0.1:5672/'
+    )
+    queue_instant: str = Field(validation_alias='QUEUE_INSTANT', default='instant.notification')
+    queue_scheduled: str = Field(
+        validation_alias='QUEUE_SCHEDULED', default='scheduled.notification'
+    )
 
 
 settings = Settings()

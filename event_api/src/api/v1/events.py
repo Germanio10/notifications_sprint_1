@@ -1,8 +1,8 @@
-from models.response import ResponseNotification, ResponseTemplate
+from models.response_model import ResponseNotification, ResponseTemplate
 from fastapi import APIRouter, Body, Depends, status
 from models.notifications import Event
 from models.templates import Template
-from services.notifications import Notifications, get_notification_service
+from service.notifications import Notifications, get_notification_service
 
 events_router = APIRouter()
 

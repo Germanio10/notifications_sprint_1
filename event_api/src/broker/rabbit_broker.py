@@ -1,20 +1,22 @@
+"""Реализация AbstractBroker для RabbitMQ."""
+
 import aiormq
-from broker.abstract import AbstractBroker
+from broker.abstract_broker import AbstractBroker
+from core.config import settings
 
 
 class RabbitBroker(AbstractBroker):
-
-    def __init__(self, connection, channel):
-        self.connection = connection
+    def __init__(self, connection, channel) -> None:
         self.channel = channel
+        self.connection = connection
 
-    async def declare_queue(self):
-        await self.channel.queue_declare(queue='instant.notification', durable=True)
-        await self.channel.queue_declare(queue='sheduled.notification', durable=True)
+    async def create_queue(self) -> None:
+        await self.channel.queue_declare(queue=settings.queue_instant, durable=True)
+        await self.channel.queue_declare(queue=settings.queue_scheduled, durable=True)
 
-    async def send_to_broker(self, routing_key: str, body: bytes, exchange: str = ''):
+    async def send_to_broker(self, routing_key: str, body: bytes, exchange: str = '') -> None:
         message_properties = aiormq.spec.Basic.Properties(
-            delivery_mode=2
+            delivery_mode=2,
         )
         try:
             await self.channel.basic_publish(
@@ -23,5 +25,5 @@ class RabbitBroker(AbstractBroker):
                 body=body,
                 properties=message_properties,
             )
-        except aiormq.exceptions.AMQPError as err:
-            raise f'Error sending message to broker {err}'
+        except aiormq.exceptions.AMQPError as er:
+            raise str(er) from er

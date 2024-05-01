@@ -1,12 +1,12 @@
 import datetime
 import uuid
 
-from models.base import BaseOrjsonModel
+from pydantic import BaseModel
 
 
-class ResponseNotification(BaseOrjsonModel):
+class ResponseNotification(BaseModel):
     event_type: str | None
-    notification_type: str
+    type: str
     content_id: uuid.UUID | None
     content_data: str
     template_id: uuid.UUID | None
@@ -15,15 +15,15 @@ class ResponseNotification(BaseOrjsonModel):
     cron: str | None
     scheduled_timestamp: int | None
     notification_id: uuid.UUID
-    notification_time_create: datetime.datetime
-    notification_status: str
-    last_update: datetime.datetime
-    last_notification_send: datetime.datetime | None
+    time_create: datetime.datetime
+    status: str
+    last_time_update: datetime.datetime
+    last_time_send: datetime.datetime | None
 
 
-class ResponseTemplate(BaseOrjsonModel):
+class ResponseTemplate(BaseModel):
     template_id: uuid.UUID
     event_type: str | None
-    notification_type: str
+    type: str
     subject: str | None
     content_data: str
