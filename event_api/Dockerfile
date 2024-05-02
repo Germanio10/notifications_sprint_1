@@ -12,7 +12,7 @@ WORKDIR $APP_HOME
 
 ARG GID=1000
 ARG UID=1000
-ARG USER=notification_api
+ARG USER=ugc_api
 RUN addgroup -g $GID -S $USER  \
     && adduser -S $USER -G $USER --disabled-password --uid "$UID"
 
@@ -24,11 +24,7 @@ RUN poetry export -f requirements.txt --output requirements.txt
 RUN pip install -r requirements.txt --no-cache-dir
 
 COPY --chown=$USER:$USER ./src $APP_HOME
-COPY --chown=$USER:$USER ./utils $APP_HOME
-COPY --chown=$USER:$USER ./entrypoint.sh $APP_HOME
-
-RUN ["chmod", "+x", "./entrypoint.sh"]
 
 USER $USER
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["gunicorn", "main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000"]

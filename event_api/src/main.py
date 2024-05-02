@@ -1,37 +1,32 @@
 from contextlib import asynccontextmanager
 
 import uvicorn
-from core.logger import LOGGING
+from api.v1 import events
 from core.config import settings
-from db import mongo_storage
+from db.mongo import mongo_storage
+from db.rabbit import rabbit_storage
 from fastapi import FastAPI
-from fastapi.responses import ORJSONResponse
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await mongo_storage.create_database()
+    await mongo_storage.on_startup(settings.mongo_uri)
+    await rabbit_storage.on_startup(settings.rabbit_uri)
     yield
-    await mongo_storage.close_connection()
+    await mongo_storage.on_shutdown()
+    await rabbit_storage.on_shutdown()
 
 
 app = FastAPI(
-    title='Notification сервис',
+    title=settings.project_name,
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
-    default_response_class=ORJSONResponse,
-    description="Сервис, предоставляющий API для отправки уведомлений на почту пользователями или на сайт",
-    version="1.0.0",
+    debug=settings.debug,
     lifespan=lifespan,
 )
 
+app.include_router(events.events_router, prefix='/api/v1/notifications', tags=['notifications'])
+
 
 if __name__ == '__main__':
-
-    uvicorn.run(
-        'main:app',
-        host='0.0.0.0',
-        port=8000,
-        log_config=LOGGING,
-        log_level=settings.log_level,
-    )
+    uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True)
