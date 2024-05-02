@@ -1,0 +1,63 @@
+version: '3.3'
+
+services:
+  event_api:
+    build:
+      context: ./event_api
+    env_file:
+      - .env
+    networks:
+      - my_network
+    depends_on:
+      - mongo_db
+      - rabbitmq
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
+
+  mongo_db:
+    image: mongo
+    env_file:
+      - .env
+    networks:
+      - my_network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok'
+      interval: 2s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "27017:27017"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    env_file:
+      - .env
+    networks:
+      - my_network
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  
+  worker:
+    build:
+      context: ./worker
+    image: worker-image
+    env_file:
+      - .env
+    container_name: worker
+    depends_on:
+      - mongo_db
+      - rabbitmq
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    external: True
