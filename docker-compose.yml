@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 services:
   event_api:
@@ -9,10 +9,8 @@ services:
     networks:
       - my_network
     depends_on:
-      mongo_db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - mongo_db
+      - rabbitmq
     ports:
       - "8000:8000"
     expose:
@@ -29,7 +27,6 @@ services:
       interval: 2s
       timeout: 5s
       retries: 5
-      start_period: 5s
     ports:
       - "27017:27017"
 
@@ -47,7 +44,7 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-
+  
   worker:
     build:
       context: ./worker
@@ -62,22 +59,6 @@ services:
         condition: service_healthy
     networks:
       - my_network
-
-  scheduler:
-    build:
-      context: ./scheduler
-    image: notiication_scheduler_image
-    env_file:
-      - .env
-    container_name: scheduler
-    depends_on:
-      mongo_db:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    networks:
-      - my_network
-
 
 networks:
   my_network:
