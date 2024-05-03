@@ -44,6 +44,19 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+  
+  worker:
+    build:
+      context: ./worker
+    image: worker-image
+    env_file:
+      - .env
+    container_name: worker
+    depends_on:
+      - mongo_db
+      - rabbitmq
+    networks:
+      - my_network
 
 networks:
   my_network:
