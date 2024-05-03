@@ -1,3 +1,5 @@
+"""Модуль отображения email сообщений."""
+
 from core.logger import logger
 from models.message import EmailModel
 from services.sender.abstract_sender import AbstractSender

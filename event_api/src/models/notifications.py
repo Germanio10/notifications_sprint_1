@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field, model_validator
 
 class EventTypeEnum(str, enum.Enum):
     registered = 'registered'
+    recommendations = 'recommendations'
+    new_episode = 'new_episode'
     like_comment = 'like_comment'
 
 
@@ -26,6 +28,7 @@ class Event(BaseModel):
     event_type: EventTypeEnum | None
     template_id: uuid.UUID | None
     users_ids: list[uuid.UUID] = Field(..., min_items=1)
+    type: NotificationTypeEnum = NotificationTypeEnum.email
     content_id: uuid.UUID | None
     content_data: str | None
     scheduled: bool = False
@@ -46,17 +49,27 @@ class Event(BaseModel):
                 status_code=HTTPStatus.BAD_REQUEST,
                 detail='Must be one of the fields content_id or event_type',
             )
-        if event_type == 'registered' and not template_id:
+        if event_type == EventTypeEnum.registered and not template_id:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
                 detail='template_id must be specified if event_type is registered',
             )
-        if event_type == 'like_comment' and not scheduled:
+        if event_type == EventTypeEnum.recommendations and not content_data:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail='If event_type is recommendations, set the required specify content_data',
+            )
+        if event_type == EventTypeEnum.new_episode and not content_data:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail='If event_type is recommendations, set the required specify content_data',
+            )
+        if event_type == EventTypeEnum.like_comment and not scheduled:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
                 detail='If event_type is like_comment, set the required scheduled field to true',
             )
-        if event_type == 'like_comment' and not content_id:
+        if event_type == EventTypeEnum.like_comment and not content_id:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
                 detail='If event_type is like_comment, set the required specify content_id',
@@ -83,7 +96,6 @@ class Event(BaseModel):
 
 class Notification(Event):
     notification_id: uuid.UUID = Field(..., default_factory=uuid.uuid4)
-    type: NotificationTypeEnum = NotificationTypeEnum.email
     time_create: datetime.datetime = datetime.datetime.now(datetime.timezone.utc)
     status: NotificationStatusEnum = NotificationStatusEnum.not_sent
     last_time_update: datetime.datetime = datetime.datetime.now(datetime.timezone.utc)
@@ -103,3 +115,8 @@ class NotificationError(Exception):
 class QueueMessage(BaseModel):
     notification_id: uuid.UUID
     users_ids: list[uuid.UUID] = Field(..., min_items=1)
+
+
+class WsMessage(BaseModel):
+    type: str
+    message: dict

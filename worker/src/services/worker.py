@@ -2,13 +2,16 @@ import json
 import uuid
 
 from broker.abstract_broker import AbstractBroker
+from core.config import settings
 from core.logger import logger
 from db.abstract_repository import AbstractRepository
 from models.broker_message import QueueMessage, QueueRemove
-from models.notification import Notification
+from models.message import WsMessage
+from models.notification import Notification, NotificationTypeEnum
 from models.templates import Template
 from models.worker_cron import CronModel
 from services.messages.abstract_message import AbstractMessage
+from websocket import create_connection
 
 
 class Worker:
@@ -21,12 +24,15 @@ class Worker:
         self.db = db
         self.broker = broker
         self.message = message
+        self.ws_url = settings.ws_uri
 
     async def on_message(self, message: dict) -> None:
         msg = QueueMessage(**json.loads(message.body))
         notification = await self.get_notification(msg.notification_id)
-        if notification.type.email:
+        if notification.type == NotificationTypeEnum.email:
             await self.send_email(notification, msg.users_ids)
+        if notification.type == NotificationTypeEnum.web_socket:
+            await self.send_websocket(notification, msg.users_ids)
 
     async def on_scheduler(self, message: dict) -> None:
         scheduler_msg = QueueMessage(**json.loads(message.body))
@@ -45,19 +51,19 @@ class Worker:
     async def timestamp(
         self, notification: Notification, ids_users_with_same_timezone: list[uuid.UUID]
     ) -> None:
-        if notification.type.email:
+        if notification.type == NotificationTypeEnum.email:
             await self.send_email(notification, ids_users_with_same_timezone)
 
     async def cron(
         self, notification: Notification, ids_users_with_same_timezone: list[uuid.UUID]
     ) -> None:
         cron = CronModel(
-            last_update=notification.last_time_send,
-            last_notification_send=notification.last_time_send,
+            last_time_update=notification.last_time_send,
+            last_time_send=notification.last_time_send,
         )
         if cron.time_difference < cron.time_of_deletion:
-            if cron.last_time_send is None or cron.last_time_send < cron.last_update:
-                if notification.type.email:
+            if cron.last_time_send is None or cron.last_time_send < cron.last_time_update:
+                if notification.type == NotificationTypeEnum.email:
                     await self.send_email(notification, ids_users_with_same_timezone)
             return
         logger.info(
@@ -89,3 +95,20 @@ class Worker:
         logger.info(
             f'У пользователей "{ids_users_with_same_timezone}" отключены email уведомления.'
         )
+
+    async def send_websocket(
+        self,
+        notification: Notification,
+        ids_users_with_same_timezone: list[uuid.UUID],
+    ):
+        event = WsMessage(
+            type='worker',
+            message={
+                'users_ids': [str(id) for id in ids_users_with_same_timezone],
+                'content_data': notification.content_data,
+            },
+        )
+        ws = create_connection(self.ws_url)
+        ws.send(json.dumps(event.model_dump()))
+
+        await self.db.update_notification_after_send(notification.notification_id)

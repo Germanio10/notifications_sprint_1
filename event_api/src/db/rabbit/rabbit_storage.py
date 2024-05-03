@@ -1,5 +1,6 @@
 import aiormq
-from broker import abstract_broker, rabbit_broker
+from broker import abstract_broker
+from broker import rabbit_broker
 from core.logger import logger
 
 connection: aiormq.Connection | None = None

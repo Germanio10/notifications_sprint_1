@@ -7,6 +7,8 @@ from pydantic import BaseModel
 
 class EventTypeEnum(str, enum.Enum):
     registered = 'registered'
+    recommendations = 'recommendations'
+    new_episode = 'new_episode'
     like_comment = 'like_comment'
 
 

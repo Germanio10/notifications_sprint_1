@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     rabbit_uri: str = Field(
         validation_alias='RABBIT_URI', default='amqp://admin:P@ssw0rd@127.0.0.1:5672/'
     )
+    ws_uri: str = Field(validation_alias='WS_URI', default='ws://event_api:8000/ws/notifications')
     queue_instant: str = Field(validation_alias='QUEUE_INSTANT', default='instant.notification')
     queue_from_scheduler: str = Field('send_from_scheduler.notification')
     queue_remove_scheduled: str = Field('remove_scheduled.notification')

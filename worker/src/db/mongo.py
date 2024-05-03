@@ -1,3 +1,5 @@
+"""Реализация AbstractDB для MongoDB."""
+
 import datetime
 import uuid
 
@@ -53,8 +55,8 @@ class MongoDB(AbstractRepository):
             'notifications',
             notification,
             {
-                'notification_status': 'отправлено',
-                'last_notification_send': datetime.datetime.now(datetime.timezone.utc),
+                'status': 'sent',
+                'last_time_send': datetime.datetime.now(datetime.timezone.utc),
             },
         )
 

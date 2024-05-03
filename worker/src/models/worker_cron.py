@@ -17,5 +17,5 @@ class CronModel(BaseModel):
         utc_timezone = datetime.timezone.utc
         if self.last_time_send is not None:
             self.last_time_send = self.last_time_send.astimezone(utc_timezone)
-        self.last_update = self.last_update.astimezone(utc_timezone)
-        self.time_difference = self.current_time - self.last_update
+        self.last_time_update = self.last_time_update.astimezone(utc_timezone)
+        self.time_difference = self.current_time - self.last_time_update

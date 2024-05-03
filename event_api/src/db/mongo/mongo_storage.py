@@ -1,3 +1,5 @@
+"""Модуль создания подключения/отключения к MongoDB и создание коллекций."""
+
 import uuid
 
 from core.config import settings

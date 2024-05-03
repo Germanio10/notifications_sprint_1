@@ -7,5 +7,10 @@ class EmailModel(BaseModel):
     body: str
 
 
+class WsMessage(BaseModel):
+    type: str
+    message: dict
+
+
 class MailMessageError(Exception):
     pass

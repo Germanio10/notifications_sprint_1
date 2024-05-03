@@ -1,3 +1,5 @@
+"""Модуль отправки сообщений через Mailgun."""
+
 from http import HTTPStatus
 
 import aiohttp

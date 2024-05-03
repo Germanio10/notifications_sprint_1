@@ -57,7 +57,7 @@ class Notifications:
                 existing_content,
                 {
                     'content_data': content_data,
-                    'last_update': datetime.datetime.now(datetime.timezone.utc),
+                    'last_time_update': datetime.datetime.now(datetime.timezone.utc),
                 },
             )
             del res['_id']
@@ -81,5 +81,4 @@ def get_notification_service(
     db: AbstractRepository = Depends(get_db),
     broker: AbstractBroker = Depends(get_broker),
 ) -> Notifications:
-    """DI получения сервиса для FastAPI."""
     return Notifications(db, broker)

@@ -16,6 +16,7 @@ aiohttp = "^3.9.5"
 backoff = "^2.2.1"
 python-http-client = "^3.3.7"
 sendgrid = "^6.11.0"
+websocket-client = "^1.8.0"
 
 [build-system]
 requires = ["poetry-core"]
