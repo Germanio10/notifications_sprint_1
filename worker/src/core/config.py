@@ -14,14 +14,17 @@ class Settings(BaseSettings):
     queue_from_scheduler: str = Field('send_from_scheduler.notification')
     queue_remove_scheduled: str = Field('remove_scheduled.notification')
 
-    sender: str = Field('print')
+    sender: str = Field('mailhog')
 
     sendgrid_api_key: str = ''
-    sendgrid_from_email: str = ''
+    sendgrid_from_email: str = 'noname@mail.ru'
 
     mailgun_api_key: str = ''
     mailgun_domain: str = ''
     mailgun_from_email: str = ''
+    
+    smtp_host: str = Field(validation_alias='HOG_HOST',  default='mailhog')
+    smtp_port: int = Field(validation_alias='HOG_PORT',  default=1025)
 
 
 settings = Settings()
