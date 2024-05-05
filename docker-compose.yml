@@ -17,8 +17,6 @@ services:
         condition: service_started
     ports:
       - "8000:8000"
-    expose:
-      - 8000
 
   mongo_db:
     image: mongo
