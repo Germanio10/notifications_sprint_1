@@ -18,6 +18,10 @@ class AbstractRepository(ABC):
     async def update_one(self, collection_name: str, query: dict, update_data: dict):
         pass
 
+    @abstractmethod
+    async def find(self, collection_name: str, query: dict, include_fields: dict):
+        pass
+
 
 db: AbstractRepository | None = None
 

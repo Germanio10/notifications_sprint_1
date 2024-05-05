@@ -1,10 +1,12 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Body, Depends
-from models.notifications import Event
+from models.notifications import Event, UserNotification
 from models.response_model import ResponseNotification, ResponseTemplate
 from models.templates import Template
+from models.user import User
 from service.notifications import Notifications, get_notification_service
+from utils.check_auth import CheckAuth
 
 events_router = APIRouter()
 
@@ -32,3 +34,16 @@ async def create(
     notification: Notifications = Depends(get_notification_service),
 ):
     return await notification.create_template(template)
+
+
+@events_router.get(
+    '/me',
+    description='Нотификации пользователя',
+    status_code=HTTPStatus.OK,
+    response_model=list[UserNotification],
+)
+async def get_user_notifications(
+    notification: Notifications = Depends(get_notification_service),
+    user: User = Depends(CheckAuth()),
+):
+    return await notification.get_user_notifications(user_id=user.user_id)

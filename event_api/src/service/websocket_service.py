@@ -8,29 +8,26 @@ class WebsoketService:
     def __init__(self) -> None:
         self.connected_clients = {}
 
-    async def connection_accept(self, websocket: WebSocket):
+    async def connection_accept(self, websocket: WebSocket, user_id: str):
         await websocket.accept()
-
         try:
             while True:
                 receive_data = await websocket.receive_json()
 
                 ws_message = WsMessage(**receive_data)
                 if ws_message.type == 'client':
-                    self.connected_clients[websocket] = ws_message.message['uuid']
+                    self.connected_clients[user_id] = websocket
                 if ws_message.type == 'worker':
                     await self.worker_handler(ws_message.message)
         except WebSocketDisconnect:
-            self.connected_clients.pop(websocket, None)
+            self.connected_clients.pop(user_id, None)
 
     async def worker_handler(self, message: dict):
         users_ids = message['users_ids']
-        receivers = [k for k, v in self.connected_clients.items() if v in users_ids]
-        await self.send_notification(message['content_data'], receivers)
 
-    async def send_notification(self, content_data: str, receivers: list[WebSocket]):
-        for client in receivers:
-            await client.send_text(content_data)
+        for user_id in users_ids:
+            client: WebSocket = self.connected_clients.get(user_id)
+            await client.send_text(message['content_data'])
 
 
 @lru_cache

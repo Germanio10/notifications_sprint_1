@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from functools import lru_cache
 from http import HTTPStatus
 
@@ -11,6 +12,7 @@ from models.notifications import (
     Notification,
     NotificationUserSettings,
     QueueMessage,
+    UserNotification,
 )
 from models.templates import Template
 
@@ -74,6 +76,19 @@ class Notifications:
             )
         if await self.db.save('templates', template.model_dump()):
             return template.model_dump()
+
+    async def get_user_notifications(self, user_id: str) -> list[UserNotification]:
+        notifications = await self.db.find(
+            'notifications',
+            {"users_ids": uuid.UUID(user_id)},
+            {
+                'event_type': 1,
+                'content_data': 1,
+                '_id': 0,
+            },
+        )
+        print(notifications)
+        return [UserNotification(**notify) for notify in notifications]
 
 
 @lru_cache

@@ -1,6 +1,6 @@
 from core.config import settings
-from db.abstract_repository import AbstractRepository
 from core.logger import logger
+from db.abstract_repository import AbstractRepository
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import ReturnDocument
 from pymongo.collection import Collection, InsertOneResult, UpdateResult
@@ -40,3 +40,8 @@ class MongoDB(AbstractRepository):
             return_document=ReturnDocument.AFTER,
         )
         return update_result
+
+    async def find(self, collection_name: str, query: dict, include_fields: dict) -> list:
+        collection = await self.get_collection(collection_name)
+        cursor = collection.find(query, include_fields)
+        return await cursor.to_list(length=100)

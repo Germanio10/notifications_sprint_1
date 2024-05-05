@@ -120,3 +120,8 @@ class QueueMessage(BaseModel):
 class WsMessage(BaseModel):
     type: str
     message: dict
+
+
+class UserNotification(BaseModel):
+    event_type: str | None
+    content_data: str

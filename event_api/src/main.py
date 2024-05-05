@@ -2,7 +2,8 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from api.v1 import events
-from core.config import settings
+from async_fastapi_jwt_auth import AuthJWT
+from core.config import JWTSettings, settings
 from db.mongo import mongo_storage
 from db.rabbit import rabbit_storage
 from fastapi import FastAPI
@@ -15,8 +16,14 @@ async def lifespan(app: FastAPI):
     await rabbit_storage.on_startup(settings.rabbit_uri)
 
     yield
+
     await mongo_storage.on_shutdown()
     await rabbit_storage.on_shutdown()
+
+
+@AuthJWT.load_config
+def get_config():
+    return JWTSettings()
 
 
 app = FastAPI(
