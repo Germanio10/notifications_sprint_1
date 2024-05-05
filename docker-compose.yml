@@ -13,6 +13,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      mailhog:
+        condition: service_started
     ports:
       - "8000:8000"
     expose:
@@ -47,6 +49,15 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - my_network
 
   worker:
     build:
