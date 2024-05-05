@@ -30,8 +30,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
-    ports:
-      - "27017:27017"
+    expose:
+      - 27017
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -44,9 +44,8 @@ services:
       interval: 5s
       timeout: 10s
       retries: 5
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    expose:
+      - 5672
 
   mailhog:
     image: mailhog/mailhog
